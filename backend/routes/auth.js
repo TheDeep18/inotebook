@@ -4,10 +4,11 @@ const User = require('../models/User')
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fetchuser = require('../middleware/fetchuser')
 
 const JWT_SECRET = 'Deep@deep@18'
 
-//create a user using: POST "/api/auth/createuser". No login required
+//ROUTE 1: create a user using: POST "/api/auth/createuser". No login required
 router.post('/createuser', [
     body('name', 'Name must be atleast of 3 letters').isLength({ min: 3 }),
     body('email', "Enter a valid email").isEmail(),
@@ -36,13 +37,13 @@ router.post('/createuser', [
 
         //Using jwt for token
         const data = {
-            user:{
-                id : user.id
+            user: {
+                id: user.id
             }
         }
         const authToken = jwt.sign(data, JWT_SECRET)
         // res.json(user)
-        res.json({authToken})
+        res.json({ authToken })
 
 
     } catch (error) {
@@ -56,26 +57,26 @@ router.post('/createuser', [
 
 
 
-    //create a login using: POST "/api/auth/login". No login required
-    router.post('/login', [
-        body('email', "Enter a valid email").isEmail(),
-        body('password', 'Password area should not be empty').exists(),
-    ], async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-    
-    
-    const {email, password} = req.body;
+//ROUTE 2: create a login using: POST "/api/auth/login". No login required
+router.post('/login', [
+    body('email', "Enter a valid email").isEmail(),
+    body('password', 'Password area should not be empty').exists(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+
+    const { email, password } = req.body;
     try {
-        let user = await User.findOne({email})
-        if (!user){
+        let user = await User.findOne({ email })
+        if (!user) {
             return res.status(400).json({ error: "Please login with correct credentials" })
         }
 
         const passwordCompare = await bcrypt.compare(password, user.password)
-        if(!passwordCompare){
+        if (!passwordCompare) {
             return res.status(400).json({ error: "Please login with correct credentials" })
         }
         const data = {
@@ -93,5 +94,21 @@ router.post('/createuser', [
         res.status(500).send("Some Error occured")
     }
 })
+
+//ROUTE 2: create a login using: POST "/api/auth/login". No login required
+router.post('/getuser', fetchuser,  async (req, res) => {
+try {
+    userId = req.user.id
+    let user = await User.findById(userId).select("-password")
+    res.send(user)
+
+
+} catch (error) {
+    console.error(error.body)
+    res.status(500).send("Some Error occured")
+}
+}
+
+)
 
 module.exports = router
