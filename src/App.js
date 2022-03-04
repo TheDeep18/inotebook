@@ -9,6 +9,7 @@ import {
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import About from './components/About';
+import Alert from './components/Alert';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <NoteState>
       <BrowserRouter>
       <Navbar/>
+      <Alert message="This is my alert"/>
       <div className="container">
         <Routes>
           <Route path="/" element={<Home />} />
