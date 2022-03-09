@@ -1,6 +1,9 @@
+/* eslint-disable react/react-in-jsx-scope */
 import NoteContext from "./noteContext";
 import { useState } from "react";
-const NoteState = (props)=> {
+
+const NoteState = (props) => {
+    const host = 'http://localhost:5000';
 
     const notesInitial = [
         {
@@ -98,8 +101,18 @@ const NoteState = (props)=> {
     const [notes, setNotes] = useState(notesInitial)
 
     //Add a note
-    const addNote = (title, description, tag)=>{
+    const addNote = async (title, description, tag) => {
         //TODO: API call
+        //API call
+        const response = await fetch(`${host}/api/notes/addnote`, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            headers: {
+                'Content-Type': 'application/json',
+                'auth-token': "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjIxNzUyMzRkZmEwNDE2MTQ3MThiYTJiIn0sImlhdCI6MTY0NTY5ODgyNn0.U-DBs66ORvxTMKf5FZM_ZdePyQXtt6oKBuALabnzkro"
+            },
+            body: JSON.stringify({ title, description, tag })
+        });
+
         console.log("Adding a new note");
         const note = {
             "_id": "621c9e83b38fb49ase0b6a05",
@@ -109,26 +122,47 @@ const NoteState = (props)=> {
             "tag": tag,
             "date": "2022-02-28T10:05:55.347Z",
             "__v": 0
-        }
+        };
         setNotes(notes.concat(note))
     }
 
     //Delete a note
 
-    const deleteNote = ()=>{
+    const deleteNote = (id) => {
+        console.log("Deleting a note id " + id);
+        const newNotes = notes.filter((note) => { return note._id !== id })
+        setNotes(newNotes)
 
     }
 
     //Edit a note
-    const editNote = () => {
+    const editNote = async (id, title, description, tag) => {
+        //API call
+        const response = await fetch(`${host}/api/notes/updatenote/${id}`, {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+                'auth-token': "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjIxNzUyMzRkZmEwNDE2MTQ3MThiYTJiIn0sImlhdCI6MTY0NTY5ODgyNn0.U-DBs66ORvxTMKf5FZM_ZdePyQXtt6oKBuALabnzkro"
+            },
+            body: JSON.stringify({ title, description, tag })
+        });
 
+        //Logic to edit in client
+        for(let index = 0; index < notes.length; index++) {
+            const element = notes[index];
+            if (element._id === id) {
+                element.title = title;
+                element.description = description;
+                element.tag = tag;
+            }
+        }
     }
 
     return (
-    <NoteContext.Provider value={{notes, addNote, deleteNote, editNote}}>
-        {props.children}
-    </NoteContext.Provider>
+        <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote }}>
+            {props.children}
+        </NoteContext.Provider>
     )
-}
 
+}
 export default NoteState;
