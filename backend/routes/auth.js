@@ -14,6 +14,7 @@ router.post('/createuser', [
     body('email', "Enter a valid email").isEmail(),
     body('password', 'Password length must be of more than 5 letters').isLength({ min: 5 }),
 ], async (req, res) => {
+    let success = false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
     
@@ -23,7 +24,7 @@ router.post('/createuser', [
     try {
         let user = await User.findOne({ email: req.body.email })
         if (user) {
-            return res.status(400).json({ error: "Sorry a user with this email already exist" })
+            return res.status(400).json({success,  error: "Sorry a user with this email already exist" })
         }
 
         //using bcrypt js for hashing
@@ -44,7 +45,8 @@ router.post('/createuser', [
         }
         const authToken = jwt.sign(data, JWT_SECRET)
         // res.json(user)
-        res.json({ authToken })
+        success = true
+        res.json({success,  authToken })
 
 
     } catch (error) {
