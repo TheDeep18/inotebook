@@ -31,6 +31,7 @@ router.post('/createuser', [
         const salt = await bcrypt.genSalt(10);
         const secPass = await bcrypt.hash(req.body.password, salt)
 
+        //Create a new user
         user = await User.create({
             name: req.body.name,
             password: secPass,
@@ -102,7 +103,7 @@ router.post('/login', [
     }
 })
 
-//ROUTE 2: create a login using: POST "/api/auth/login". No login required
+//ROUTE 3: create a login using: POST "/api/auth/login". No login required
 router.post('/getuser', fetchuser,  async (req, res) => {
 try {
     userId = req.user.id
